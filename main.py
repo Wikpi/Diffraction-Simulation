@@ -34,11 +34,11 @@ def intensity(I0: float, beta: float) -> float:
     return I0 * (math.sin(beta) / beta)**2 + 65.6 # Some random value?
 
 # Compute theoretical diffraction pattern.
-def diffractionPattern(I0: float, thetaRange: NDArray) -> list:
+def diffractionPattern(I0: float, thetaRange: NDArray) -> list[float]:
     """`diffractionPattern` computes the full theoretical diffraction model intensity solutions for a given `thetaRange` and initial intensity `I0`."""
     
     # The final list of intensity solution points
-    pattern: list = []
+    pattern: list[float] = []
 
     # Compute intensity for each new theta
     for theta in thetaRange:
@@ -54,33 +54,45 @@ def diffractionPattern(I0: float, thetaRange: NDArray) -> list:
 
 # Main entry point for the diffraction simulation
 def main() -> None:
-    # Measured or 'real' data
+    ###
+    # Intensity pattern comparing
+    ###
+
+    # Measured 'real' data
     realData: NDArray = dt.readData(cst.dataPath)
     # The measured data peak value index
     peakIndex: NDArray = tools.maxPeakIndex(realData)
     # Measured 'real' data x value range conversion to general theta expressions
     realThetaRange: NDArray = tools.pixelToTheta(realData[:, 0], peakIndex)
-    
+    # Measured 'real' data values
+    realIntensity: NDArray = realData[:, 1]
+
+    plot.plotGraph(realThetaRange, realIntensity, label="Measured Pattern")
+
     # Adjusted initial (amplitued) as to measured data
     I0: float = realData[peakIndex,1]
     # Using theta parameters define the simulation grid (in radians)
     modelThetaRange: NDArray = np.linspace(math.radians(-params.maxTheta), math.radians(params.maxTheta), params.thetaStep)
     # Theoretical model intensity values
-    intensityData: list = diffractionPattern(I0, modelThetaRange)
+    modelIntensity: list[float] = diffractionPattern(I0, modelThetaRange)
 
-    # Comparing the the actual intenisty values
-    plot.plotGraph(modelThetaRange, intensityData)
-    plot.plotGraph(realThetaRange, realData[:,1])
+    plot.plotGraph(modelThetaRange, modelIntensity, label="Theoretical Pattern")
 
+    plot.configureGraph("Comparing theoretical with measured diffraction pattern intenisty values.", "$\\theta$ (radians)", "I (volts)", True)
     plot.displayGraph()
 
-    modelMinima = tools.predictMinima()
-    realMinima = tools.findMinima(realData, peakIndex)
+    ###
+    # Minima comparing
+    ###
+
+    modelMinima: list[list] = tools.predictMinima()
+    realMinima: list[NDArray] = tools.findMinima(realThetaRange, realIntensity)
 
     # Comparing the minima values
-    plot.plotGraph(range(-int(0.5* np.size(realMinima[0])), int(0.5* np.size(realMinima[0]))+1), realMinima[0], "Measured minima")
+    plot.plotGraph(realMinima[0], realMinima[1], "Measured minima")
     plot.plotGraph(modelMinima[0], modelMinima[1], "Theoretical Minima")
     
+    plot.configureGraph("Comparing theoretical with measured diffraction minima values.", "n", "$\\theta$ (radians)", True)
     plot.displayGraph()
 
     return

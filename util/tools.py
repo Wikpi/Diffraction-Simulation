@@ -28,7 +28,7 @@ def pixelToTheta(pixelValues: NDArray, peakPixel: float) -> NDArray:
 def predictMinima() -> list[list]:
     """`predictMinima` computes the first n minima in the diffraction pattern, as per the theoretial formula"""
 
-    # Final list of theoretical minima coordinates- first element is theta, second element is Intensity
+    # Final list of theoretical minima: first element is a list of n values, second element is a list of minima values
     theoryMinima: list = [[], []]
     # Computing te fist n minima:
     for i in range(-params.n, params.n + 1):
@@ -43,17 +43,16 @@ def predictMinima() -> list[list]:
     return theoryMinima
 
 # Finds minima points
-def findMinima(data: NDArray, peakPixel: float) -> tuple[NDArray, NDArray]:
-    """`findMinima` finds all minima points in the given `data`"""
-    
-    pixelPositions = data[:, 0]
-    intensities = data[:, 1]
+def findMinima(xValues: NDArray, yValues: NDArray) -> list[NDArray]:
+    """`findMinima` finds all minima points in the given `yValues`."""
 
-    # Invert intensity to find minima as peaks in -intensity
-    minimaIndices, _ = find_peaks(-intensities, distance=params.minimaDistance)
+    # Invert intensity to find minima as peaks, using minimaDistance to reduce inaccuracy from noisiness
+    minimaIndices, _ = find_peaks(-yValues, distance=params.minimaDistance)
+    minimaValues: NDArray = xValues[minimaIndices]
 
-    # Convert pixel positions to theta using the same conversion
-    theta_minima = pixelToTheta(pixelPositions[minimaIndices], peakPixel)
-    intensity_minima = intensities[minimaIndices]
+    # Partial n count, meaning from center to one direction only (half of all n values)
+    nPartial: int = int(np.size(minimaValues) / 2)
+    nRange: list[int] = range(-nPartial, nPartial+1) # Ensure to include last point
 
-    return theta_minima, intensity_minima
+    # Final list of measured minima: first element is a list of n values, second element is a list of minima values
+    return [nRange, minimaValues]
