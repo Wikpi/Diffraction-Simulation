@@ -15,3 +15,7 @@ pixelCount: int = 3678
 wavelength: float = 635e-9
 # Pixel width (in meters)
 pixelWidth: float = 8e-6
+# Number of theoretical minima calculated
+n: float = 32
+# The distance between each new consecutive minima point. This is introduced to reduce redundancy from noisiness
+minimaDistance: float = 80

@@ -3,6 +3,7 @@ import numpy as np
 from scipy.constants import pi
 from numpy.typing import NDArray
 import scipy.signal as signal
+import matplotlib.pyplot as plt
 
 # Custom Packages
 import params
@@ -51,21 +52,6 @@ def diffractionPattern(I0: float, thetaRange: NDArray) -> list:
     
     return pattern
 
-# def getMinima(data: NDArray, distance: float, peakPixel: float) -> tuple[NDArray, NDArray]:
-#     pixelPositions = data[:, 0]
-#     intensities = data[:, 1]
-
-#     # Invert intensity to find minima as peaks in -intensity
-#     inverted = -intensities
-#     minima_indices, _ = signal.find_peaks(inverted, distance=80)
-
-#     # Convert pixel positions to theta using the same conversion
-#     theta_minima = tools.pixelToTheta(pixelPositions[minima_indices], distance, peakPixel)
-#     intensity_minima = intensities[minima_indices]
-
-#     return theta_minima, intensity_minima
-
-
 # Main entry point for the diffraction simulation
 def main() -> None:
     # Measured or 'real' data
@@ -75,8 +61,6 @@ def main() -> None:
     # Measured 'real' data x value range conversion to general theta expressions
     realThetaRange: NDArray = tools.pixelToTheta(realData[:, 0], peakIndex)
     
-    # minima = getMinima(realData, slitWidthB, peakPixel)
-    
     # Adjusted initial (amplitued) as to measured data
     I0: float = realData[peakIndex,1]
     # Using theta parameters define the simulation grid (in radians)
@@ -84,11 +68,18 @@ def main() -> None:
     # Theoretical model intensity values
     intensityData: list = diffractionPattern(I0, modelThetaRange)
 
+    # Comparing the the actual intenisty values
     plot.plotGraph(modelThetaRange, intensityData)
     plot.plotGraph(realThetaRange, realData[:,1])
 
-    # plt.scatter(minima[0], minima[1])
-    # plot.plotGraph(range(-int(0.5* np.size(minima[0])), int(0.5* np.size(minima[0]))+1), minima[0])
+    plot.displayGraph()
+
+    modelMinima = tools.predictMinima()
+    realMinima = tools.findMinima(realData, peakIndex)
+
+    # Comparing the minima values
+    plot.plotGraph(range(-int(0.5* np.size(realMinima[0])), int(0.5* np.size(realMinima[0]))+1), realMinima[0], "Measured minima")
+    plot.plotGraph(modelMinima[0], modelMinima[1], "Theoretical Minima")
     
     plot.displayGraph()
 
