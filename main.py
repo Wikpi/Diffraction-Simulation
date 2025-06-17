@@ -94,8 +94,17 @@ def main() -> None:
         modelMinima: list[list] = tools.predictMinima(slitWidth)
         realMinima: list[NDArray] = tools.findMinima(realThetaRange, realIntensity)
 
+        initialGuess: NDArray = np.array([params.wavelength / slitWidth, 0.0])
+        calibratedRealMinima = tools.solveMinimaUncertainty(realMinima[0], realMinima[1], initialGuess)
+
+        # Fitted parameters
+        slope, intercept = calibratedRealMinima[0]
+
+        # print(calibratedRealMinima)
+
         # Comparing the minima values
         plot.plotGraph(realMinima[0], realMinima[1], "Measured minima")
+        plot.plotGraph(realMinima[0], np.array(slope) * np.array(realMinima[0]) + np.array(intercept), "Measured calibrated minima")
         plot.plotGraph(modelMinima[0], modelMinima[1], "Theoretical Minima")
         
         plot.configureGraph("Comparing theoretical with measured diffraction minima values.", "n", "$\\theta$ (radians)", True)
