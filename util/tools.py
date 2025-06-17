@@ -25,7 +25,7 @@ def pixelToTheta(pixelValues: NDArray, peakPixel: float) -> NDArray:
     return thetaValues
 
 # Finds the theoretical minima
-def predictMinima() -> list[list]:
+def predictMinima(slitWidth: float) -> list[list]:
     """`predictMinima` computes the first n minima in the diffraction pattern, as per the theoretial formula"""
 
     # Final list of theoretical minima: first element is a list of n values, second element is a list of minima values
@@ -36,7 +36,7 @@ def predictMinima() -> list[list]:
         if i == 0:
             continue
         
-        minTheta: float = ((i * params.wavelength) / params.slitWidth)
+        minTheta: float = ((i * params.wavelength) / slitWidth)
         theoryMinima[0].append(i) 
         theoryMinima[1].append(minTheta)
 
