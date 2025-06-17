@@ -10,11 +10,6 @@ def maxPeakIndex(data: NDArray) -> NDArray:
 
     return np.argmax(data[:, 1])
 
-    # peakIntensity = max(list(data[:,1]))
-    # peakPixel = np.where(data == peakIntensity)[0][0]
-
-    # return peakPixel
-
 # Converts width values to angle values.
 def pixelToTheta(pixelValues: NDArray, peakPixel: float) -> NDArray:
     """`pixelToTheta` converts given values from `pixelValues` in pixels to values in theta."""

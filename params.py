@@ -6,9 +6,9 @@ minTheta: float = 1
 # Max theta for which to compute intensity (in degrees)
 maxTheta: float = 2
 # Step at which to compute theta range values (in degrees)
-thetaStep = 500
+thetaStep: float = 500
 # The distance between slit and screen (in meters)
-slitDistance = 75e-2
+slitDistance: float = 75e-2
 # The total amount of pixels that were preconfigured for the CCD screen
 pixelCount: int = 3678
 # Wavelength of the laser (in meters)

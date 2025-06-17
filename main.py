@@ -42,10 +42,10 @@ def diffractionPattern(I0: float, thetaRange: NDArray) -> list:
     # Compute intensity for each new theta
     for theta in thetaRange:
         # First convert theta to beta
-        newBeta = beta(theta)
+        newBeta: float = beta(theta)
 
         # From beta compute the intensity
-        newIntensity = intensity(I0, newBeta)
+        newIntensity: float = intensity(I0, newBeta)
         
         pattern.append(newIntensity)
     
@@ -69,20 +69,20 @@ def diffractionPattern(I0: float, thetaRange: NDArray) -> list:
 # Main entry point for the diffraction simulation
 def main() -> None:
     # Measured or 'real' data
-    realData = dt.readData(cst.dataPath)
+    realData: NDArray = dt.readData(cst.dataPath)
     # The measured data peak value index
     peakIndex: NDArray = tools.maxPeakIndex(realData)
     # Measured 'real' data x value range conversion to general theta expressions
-    realThetaRange = tools.pixelToTheta(realData[:, 0], peakIndex)
+    realThetaRange: NDArray = tools.pixelToTheta(realData[:, 0], peakIndex)
     
     # minima = getMinima(realData, slitWidthB, peakPixel)
     
     # Adjusted initial (amplitued) as to measured data
-    I0 = realData[peakIndex,1]
+    I0: float = realData[peakIndex,1]
     # Using theta parameters define the simulation grid (in radians)
-    modelThetaRange = np.linspace(math.radians(-params.maxTheta), math.radians(params.maxTheta), params.thetaStep)
+    modelThetaRange: NDArray = np.linspace(math.radians(-params.maxTheta), math.radians(params.maxTheta), params.thetaStep)
     # Theoretical model intensity values
-    intensityData = diffractionPattern(I0, modelThetaRange)
+    intensityData: list = diffractionPattern(I0, modelThetaRange)
 
     plot.plotGraph(modelThetaRange, intensityData)
     plot.plotGraph(realThetaRange, realData[:,1])
