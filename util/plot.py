@@ -27,12 +27,12 @@ def plotGraph(xAxis: NDArray, yAxis: NDArray, label: str = "New Graph") -> None:
     plt.plot(xAxis, yAxis, label=label)
 
     # Get all major plot ticks based on overall x axis 
-    indices = np.linspace(0, xAxis.size-1, 5, dtype=int)
-    tickValues = np.round(xAxis[indices], 2)
+    # indices = np.linspace(0, xAxis.size-1, 5, dtype=int)
+    # tickValues = np.round(xAxis[indices], 2)
 
-    ax = plt.gca()
-    ax.set_xlim(tickValues[0], tickValues[-1]) # Enforce hard limits for plot from -L ro L
-    ax.set_xticks(tickValues) # Show major tick marks
+    # ax = plt.gca()
+    # ax.set_xlim(tickValues[0], tickValues[-1]) # Enforce hard limits for plot from -L ro L
+    # ax.set_xticks(tickValues) # Show major tick marks
 
 # Display the graph to screen.
 def displayGraph() -> None:
