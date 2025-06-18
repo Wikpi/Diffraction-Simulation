@@ -17,3 +17,7 @@ pixelWidth: float = 8e-6
 n: float = 32
 # The distance between each new consecutive minima point. This is introduced to reduce redundancy from noisiness
 minimaDistance: float = 80
+# Uncertainty for n (x axis)
+nMinimalUncertainty: float = 0.1
+# Uncertainty for theta (y axis)
+thetaMinimalUncertainty: float = 10e-5
