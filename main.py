@@ -55,7 +55,11 @@ def diffractionPattern(I0: float, slitWidth, thetaRange: NDArray) -> list[float]
 # Main entry point for the diffraction simulation
 def main() -> None:
     # Add more samples to get more comparison results
-    samples: list[str] = [dt.dataPath]
+    samples: list[str] = [dt.dataPath620, dt.dataPath650, dt.dataPath700, dt.dataPath750]
+    # samples: list[str] = [dt.dataPath]
+
+    realSlitWidths: list = []
+    modelSlitWidths: list = []
 
     # Compute the comparison graph for every sample
     for sample in samples:
@@ -65,24 +69,39 @@ def main() -> None:
         # Get slitwidth from the saved filepath name i.e. data/diffraction_data_200.dat -> slitWidth = 200
         filepath: str = Path(sample).stem # Take the filepath without extension
         slitWidth: float = float(filepath.split("_")[-1])  # Take the part after the last underscore, which is defined to be the slit width
+        # slitWidth += 12
+
+        slitWidth *= 1e-6 # Convert to meters
 
         # Measured 'real' data
         realData: NDArray = dt.readData(sample)
-        # The measured highest data peak value index
-        peakIndex: NDArray = tools.maxPeakIndex(realData)
-        # Measured 'real' data x value range conversion to general theta expressions
-        realThetaRange: NDArray = tools.pixelToTheta(realData[:, 0], peakIndex)
-        # Measured 'real' data values
-        realIntensity: NDArray = realData[:, 1]
 
-        # Adjusted initial (amplitued) as to measured data
-        I0: float = realData[peakIndex,1]
-        # Using theta parameters define the simulation grid (in radians)
-        modelThetaRange: NDArray = np.linspace(math.radians(params.minTheta), math.radians(params.maxTheta), params.thetaStep)
-        # Theoretical model intensity values
-        modelIntensity: list[float] = diffractionPattern(I0, slitWidth, modelThetaRange)
+        # pick an odd window ≤ len(y)
+        n = len(realData[:, 1])
+        window_length = min(31, n if n % 2 == 1 else n - 1)
+        polyorder     = 2 if window_length > 2 else 1
+
+        # smooth intensity
+        smoothedRealIntensity = signal.savgol_filter(realData[:, 1], window_length=window_length, polyorder=polyorder)
+
+        # plot.plotGraph(realData[:,0], smoothedRealIntensity)
+
+        # The measured highest data peak value index
+        # peakIndex: NDArray = tools.maxPeakIndex(realData)
+        # Measured 'real' data x value range conversion to general theta expressions
+        # realThetaRange: NDArray = tools.pixelToTheta(realData[:, 0], peakIndex)
 
         ####### Intensity pattern comparing
+        # Measured 'real' data values
+        # realIntensity: NDArray = realData[:, 1]
+
+        # Adjusted initial (amplitued) as to measured data
+        # I0: float = realData[peakIndex,1]
+        # Using theta parameters define the simulation grid (in radians)
+        # modelThetaRange: NDArray = np.linspace(math.radians(params.minTheta), math.radians(params.maxTheta), params.thetaStep)
+        # # Theoretical model intensity values
+        # modelIntensity: list[float] = diffractionPattern(I0, slitWidth, modelThetaRange)
+
         # plot.plotGraph(modelThetaRange, modelIntensity, label="Theoretical Pattern")
         # plot.plotGraph(realThetaRange, realIntensity, label="Measured Pattern")
 
@@ -92,23 +111,36 @@ def main() -> None:
 
         # Find the minimas for both model and measured data
         modelMinima: list[list] = tools.predictMinima(slitWidth)
-        realMinima: list[NDArray] = tools.findMinima(realThetaRange, realIntensity)
+        realMinima: list[NDArray] = tools.findMinima(realData[:, 0], smoothedRealIntensity)
 
-        initialGuess: NDArray = np.array([params.wavelength / slitWidth, 0.0])
+        initialGuess: NDArray = np.array([params.wavelength / slitWidth])
         calibratedRealMinima = tools.solveMinimaUncertainty(realMinima[0], realMinima[1], initialGuess)
 
         # Fitted parameters
-        slope, intercept = calibratedRealMinima[0]
+        slope = calibratedRealMinima[0]
 
-        # print(calibratedRealMinima)
+        realSlitWidth: float = params.wavelength / slope
+        
+        # Store all slit widths for final comparing
+        realSlitWidths.extend(realSlitWidth)
+        modelSlitWidths.append(slitWidth)
 
         # Comparing the minima values
-        plot.plotGraph(realMinima[0], realMinima[1], "Measured minima")
-        plot.plotGraph(realMinima[0], np.array(slope) * np.array(realMinima[0]) + np.array(intercept), "Measured calibrated minima")
-        plot.plotGraph(modelMinima[0], modelMinima[1], "Theoretical Minima")
+        # plot.plotGraph(realMinima[0], realMinima[1], "Measured minima") # Previous uncalibrated measured data
+        plot.plotErrorGraph(realMinima[0], np.array(slope) * np.array(realMinima[0]), yerr=params.thetaMinimalUncertainty, label="Measured calibrated minima", markers="+")
+        plot.plotErrorGraph(modelMinima[0], modelMinima[1], yerr=params.thetaMinimalUncertainty, label="Theoretical Minima", markers="o")
         
-        plot.configureGraph("Comparing theoretical with measured diffraction minima values.", "n", "$\\theta$ (radians)", True)
-        plot.displayGraph()
+        plot.configureGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, "n", "$\\theta$ (radians)", True)
+        plot.displayGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, save=True)
+
+    plot.plotErrorGraph(np.array(modelSlitWidths), np.array(realSlitWidths), xerr=params.slitUncertainty, yerr=params.slitUncertainty, label="")
+    plot.plotGraph(np.array(modelSlitWidths), np.array(modelSlitWidths), label="Theoretical 45 degree ratio", line="--", markers="None")
+    
+    plot.configureGraph("Comparing the model slit width with calibrated real slit width for %d samples." % len(samples), "Model", "Measured", True)
+    # plot.setGraphLimits(modelSlitWidths[-1], realSlitWidths[-1])
+    # plot.setGraphTicks(modelSlitWidths, realSlitWidths)
+    
+    plot.displayGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, save=True)
 
     return
 

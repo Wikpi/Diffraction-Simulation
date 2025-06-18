@@ -7,10 +7,10 @@ from scipy.signal import find_peaks
 import params
 
 # Find the highest peak value index.
-def maxPeakIndex(data: NDArray) -> NDArray:
+def maxPeakIndex(yValues: NDArray) -> NDArray:
     """`maxPeakIndex` finds the highest (max height) intensity value index in the provided `data`."""
 
-    return np.argmax(data[:, 1])
+    return np.argmax(yValues)
 
 # Converts width values to angle values.
 def pixelToTheta(pixelValues: NDArray, peakPixel: float) -> NDArray:
@@ -47,13 +47,22 @@ def predictMinima(slitWidth: float) -> list[list]:
 def findMinima(xValues: NDArray, yValues: NDArray) -> list[NDArray]:
     """`findMinima` finds all minima points in the given `yValues`."""
 
+    # The measured highest data peak value index
+    peakIndex: NDArray = maxPeakIndex(yValues)
+    # Measured 'real' data x value range conversion to general theta expressions
+    realThetaRange: NDArray = pixelToTheta(xValues, peakIndex)
+
     # Invert intensity to find minima as peaks, using minimaDistance to reduce inaccuracy from noisiness
     minimaIndices, _ = find_peaks(-yValues, distance=params.minimaDistance)
-    minimaValues: NDArray = xValues[minimaIndices]
+    minimaValues: NDArray = realThetaRange[minimaIndices] # Get the minima thetas
 
+    numMinima: int = np.size(minimaValues)
     # Partial n count, meaning from center to one direction only (half of all n values)
-    nPartial: int = int(np.size(minimaValues) / 2)
-    nRange: list[int] = list(range(-nPartial, nPartial+1)) # Ensure to include last point
+    nPartial: int = int(numMinima / 2)
+    if numMinima % 2 == 0:
+        nRange = list(range(-nPartial, nPartial))
+    else:
+        nRange = list(range(-nPartial, nPartial + 1))
 
     # Final list of measured minima: first element is a list of n values, second element is a list of minima values
     return [nRange, minimaValues]
@@ -66,18 +75,14 @@ def solveMinimaUncertainty(xValues: NDArray, yValues: NDArray, initial: NDArray)
     def minimaModel(B, n) -> float:
         """`minimaModel` is the minima function."""
 
-        return B[0] * n + B[1]
-    
-    # Compute full array datas for param uncertainties
-    xErr: NDArray = np.full(len(xValues), params.nMinimalUncertainty, dtype=float)
-    yErr: NDArray = np.full(len(yValues), params.thetaMinimalUncertainty, dtype=float)
+        return B[0] * n
 
     # ODR models
-    data = odr.RealData(xValues, yValues, sx=xErr, sy=yErr)
+    data = odr.RealData(xValues, yValues, sx=params.nMinimalUncertainty, sy=params.thetaMinimalUncertainty)
     model = odr.Model(minimaModel)
 
     odrSetup = odr.ODR(data, model, beta0=initial)
     output = odrSetup.run()
-    
+
     # Finall output list, first element is a list of computed values with no uncertainty: x and y, second element is their respective uncertainties.
     return [output.beta, output.sd_beta]
