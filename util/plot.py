@@ -23,25 +23,15 @@ def configureGraph(title: str, xLabel: str, yLabel: str, showGrid: bool = False)
 
     plt.grid(showGrid)
 
-def setGraphLimits(right: float, top: float):
-    plt.xlim(right=right)  # sets max limit of x-axis
-    plt.ylim(top=top)    # sets max limit of y-axis
-
-def setGraphTicks(xValues: NDArray = [], yValues: NDArray = []):
-    if len(xValues) != 0:
-        plt.xticks(xValues)
-    
-    if len(yValues) != 0:
-        plt.yticks(yValues)
-
 # Plot the simulation graph.
 def plotGraph(xAxis: NDArray, yAxis: NDArray, label: str = "New Graph", line="None", markers: str = "*") -> None:
     """`plotGraph` computes the simulation graph values."""
 
     plt.plot(xAxis, yAxis, label=label, marker=markers, linestyle=line)
 
+# Sa e as plotGraph but for recording error bars
 def plotErrorGraph(xAxis: NDArray, yAxis: NDArray, xerr: float = 0, yerr: float = 0, label: str = "New Graph", line="None", markers: str = "*") -> None:
-    """`plotGraph` computes the simulation graph values."""
+    """`plotErrorGraph` computes the simulation graph values with provided error bar values."""
 
     plt.errorbar(xAxis, yAxis, xerr=xerr, yerr=yerr, fmt="o", ecolor = "black", label=label)
 
