@@ -20,6 +20,6 @@ minimaDistance: float = 50
 # Uncertainty for n (x axis)
 nMinimaUncertainty: float = 1e-12
 # Uncertainty for theta (y axis)
-thetaMinimaUncertainty: float = 1.16 * 10e-8 #10e-5
+thetaMinimaUncertainty: float = 1.16 * 10e-8
 # Unvertainty for the slits (x and y axis)
 slitUncertainty: float = 10e-6
