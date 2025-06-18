@@ -135,10 +135,23 @@ def main() -> None:
 
     plot.plotErrorGraph(np.array(modelSlitWidths), np.array(realSlitWidths), xerr=params.slitUncertainty, yerr=params.slitUncertainty, label="")
     plot.plotGraph(np.array(modelSlitWidths), np.array(modelSlitWidths), label="Theoretical 45 degree ratio", line="--", markers="None")
-    
+     
+    # Finding line of best fit and creating a polynomial object for it
+    coeffs = np.polyfit(np.array(modelSlitWidths), np.array(realSlitWidths), 1)
+    fitLine = np.poly1d(coeffs)
+
+    # Plotting the line of best fit
+    xFit = np.linspace(min(modelSlitWidths), max(modelSlitWidths), 100)
+    yFit = fitLine(xFit)
+    plot.plotGraph(xFit, yFit, label = "Line of Best Fit", line= "-", markers = "None")
+
     plot.configureGraph("Comparing the model slit width with calibrated real slit width for %d samples." % len(samples), "Model", "Measured", True)
     # plot.setGraphLimits(modelSlitWidths[-1], realSlitWidths[-1])
     # plot.setGraphTicks(modelSlitWidths, realSlitWidths)
+
+    # Printing the final results
+    print("The slope of the line of best fit is:", coeffs[0])
+    print("The intercept of the line of best fit is: %e"%(coeffs[1],))
     
     plot.displayGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, save=True)
 
