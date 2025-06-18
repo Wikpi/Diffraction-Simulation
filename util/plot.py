@@ -43,16 +43,13 @@ def plotGraph(xAxis: NDArray, yAxis: NDArray, label: str = "New Graph", line="No
 def plotErrorGraph(xAxis: NDArray, yAxis: NDArray, xerr: float = 0, yerr: float = 0, label: str = "New Graph", line="None", markers: str = "*") -> None:
     """`plotGraph` computes the simulation graph values."""
 
-    plt.errorbar(xAxis, yAxis, xerr=xerr, yerr=yerr, fmt="o", ecolor = "black")
+    plt.errorbar(xAxis, yAxis, xerr=xerr, yerr=yerr, fmt="o", ecolor = "black", label=label)
 
 # Display the graph to screen.
-def displayGraph(title: str = "New Title", save=False) -> None:
+def displayGraph() -> None:
     """`displayGraph` shows the computed simulation graph to the screen."""
 
     plt.legend()
-
-    if save:
-        saveGraph(dt.savedDataPath, title)
 
     plt.show()
 

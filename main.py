@@ -127,13 +127,18 @@ def main() -> None:
 
         # Comparing the minima values
         # plot.plotGraph(realMinima[0], realMinima[1], "Measured minima") # Previous uncalibrated measured data
-        plot.plotErrorGraph(realMinima[0], np.array(slope) * np.array(realMinima[0]), yerr=params.thetaMinimalUncertainty, label="Measured calibrated minima", markers="+")
+        plot.plotErrorGraph(realMinima[0], np.array(slope) * np.array(realMinima[0]), yerr=params.thetaMinimalUncertainty, label="Measured Calibrated Minima", markers="+")
         plot.plotErrorGraph(modelMinima[0], modelMinima[1], yerr=params.thetaMinimalUncertainty, label="Theoretical Minima", markers="o")
         
         plot.configureGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, "n", "$\\theta$ (radians)", True)
-        plot.displayGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, save=True)
+        
+        plot.saveGraph(dt.savedDataPath, "Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth)
+        
+        plot.displayGraph()
 
-    plot.plotErrorGraph(np.array(modelSlitWidths), np.array(realSlitWidths), xerr=params.slitUncertainty, yerr=params.slitUncertainty, label="")
+    plot.clearGraph()
+
+    plot.plotErrorGraph(np.array(modelSlitWidths), np.array(realSlitWidths), xerr=params.slitUncertainty, yerr=params.slitUncertainty, label="Compared Minima Points")
     plot.plotGraph(np.array(modelSlitWidths), np.array(modelSlitWidths), label="Theoretical 45 degree ratio", line="--", markers="None")
      
     # Finding line of best fit and creating a polynomial object for it
@@ -153,7 +158,9 @@ def main() -> None:
     print("The slope of the line of best fit is:", coeffs[0])
     print("The intercept of the line of best fit is: %e"%(coeffs[1],))
     
-    plot.displayGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, save=True)
+    plot.saveGraph(dt.savedDataPath, "Comparing the model slit width with calibrated real slit width for %d samples." % len(samples))
+
+    plot.displayGraph()
 
     return
 
