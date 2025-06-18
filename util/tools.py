@@ -78,7 +78,7 @@ def solveMinimaUncertainty(xValues: NDArray, yValues: NDArray, initial: NDArray)
         return B[0] * n
 
     # ODR models
-    data = odr.RealData(xValues, yValues, sx=params.nMinimalUncertainty, sy=params.thetaMinimalUncertainty)
+    data = odr.RealData(xValues, yValues, sx=params.nMinimaUncertainty, sy=params.thetaMinimaUncertainty)
     model = odr.Model(minimaModel)
 
     odrSetup = odr.ODR(data, model, beta0=initial)

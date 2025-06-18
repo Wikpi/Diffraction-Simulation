@@ -129,8 +129,8 @@ def main() -> None:
 
         # Comparing the minima values
         # plot.plotGraph(realMinima[0], realMinima[1], "Measured minima") # Previous uncalibrated measured data
-        plot.plotErrorGraph(realMinima[0], np.array(calibratedRealMinima[0]) * np.array(realMinima[0]), yerr=params.thetaMinimalUncertainty, label="Measured Calibrated Minima", markers="+")
-        plot.plotErrorGraph(modelMinima[0], modelMinima[1], yerr=params.thetaMinimalUncertainty, label="Theoretical Minima", markers="o")
+        plot.plotErrorGraph(realMinima[0], np.array(calibratedRealMinima[0]) * np.array(realMinima[0]), yerr=params.thetaMinimaUncertainty, label="Measured Calibrated Minima", markers="+")
+        plot.plotErrorGraph(modelMinima[0], modelMinima[1], yerr=params.thetaMinimaUncertainty, label="Theoretical Minima", markers="o")
         
         plot.configureGraph("Comparing theoretical with measured diffraction minima values for slit width = %e" % slitWidth, "n", "$\\theta$ (radians)", True)
         
